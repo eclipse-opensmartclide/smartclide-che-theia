@@ -1,0 +1,1 @@
+{"version":3,"file":"MidHierarchyClass.d.ts","sourceRoot":"","sources":["../../src/node/MidHierarchyClass.ts"],"names":[],"mappings":"AAAA,OAAO,EAAC,yBAAyB,EAAC,MAAM,6BAA6B,CAAC;AACtE,qBAAa,iBAAkB,SAAQ,yBAAyB;IAC/D,UAAU,EAAG,MAAM,CAAC;gBAER,EAAE,EAAG,MAAM,EAAE,EAAE,EAAE,MAAM;IAK5B,WAAW,CAAC,OAAO,EAAG,MAAM,GAAG,MAAM;CAmC3C"}

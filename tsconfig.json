@@ -1,0 +1,22 @@
+{
+    "extends": "./configs/base.tsconfig",
+    "compilerOptions": {
+        "skipLibCheck": false,
+        "baseUrl": ".",
+        "paths": {}
+    },
+    "include": [
+        "dev-packages/*/src",
+        "generator/src",
+        "generator/tests",
+        "plugins/*/src",
+        "plugins/*/tests",
+        "plugins/*/__mocks__",
+        "extensions/*/src",
+        "extensions/*/tests",
+        "tools/*/src"
+    ],
+    "types": [
+        "node", "jest"
+    ]
+}

@@ -1,0 +1,30 @@
+# Dependency directories
+node_modules/
+
+# Logs
+yarn-error.log
+
+# IntelliJ
+.idea
+
+# VS Code
+.vscode/*
+
+# Generated files
+*.theia
+asset-*
+.eslintcache
+plugins/vscode-*
+*.tsbuildinfo
+
+# MacOS
+.DS_Store
+.Dockerfile
+.theia
+.idea
+che-editor-plugin.tar.gz
+inner-theia
+.git-che-theia-sha1
+
+# Reports
+index.md

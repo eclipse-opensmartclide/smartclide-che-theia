@@ -1,0 +1,30 @@
+/**********************************************************************
+ * Copyright (c) 2018-2020 Red Hat, Inc.
+ *
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ ***********************************************************************/
+
+/*-----------------------------------------------------------------------------
+| Caching the plugins
+|----------------------------------------------------------------------------*/
+
+.che-plugins-caching-spinner {
+    margin-top: 40%;
+}
+
+.che-plugins-caching-progress {
+    text-align: center;
+    margin-top: 10%;
+}
+
+.che-plugins-caching-progress-label {
+    line-height: 25px;
+}
+
+.che-plugins-caching-progress-status b {
+    color: var(--theia-badge-foreground);
+}

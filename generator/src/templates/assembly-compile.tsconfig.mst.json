@@ -1,0 +1,58 @@
+{
+   "extends": "{{ configDirPrefix}}base.tsconfig",
+   "compilerOptions": {
+      "composite": true,
+      "rootDir": "src",
+      "outDir": "lib"
+   },
+   "include": [
+      "src"
+   ],
+   "references": [
+      {
+         "path": "{{ packageRefPrefix}}eclipse-che-theia-plugin-ext"
+      },
+      {
+         "path": "{{ packageRefPrefix}}che-theia-hosted-plugin-manager-extension"
+      },
+      {
+         "path": "{{ packageRefPrefix}}eclipse-che-theia-about"
+      },
+      {
+         "path": "{{ packageRefPrefix}}eclipse-che-theia-activity-tracker"
+      },
+      {
+         "path": "{{ packageRefPrefix}}eclipse-che-theia-dashboard"
+      },
+      {
+         "path": "{{ packageRefPrefix}}eclipse-che-theia-user-preferences"
+      },
+      {
+         "path": "{{ packageRefPrefix}}eclipse-che-theia-git-provisioner"
+      },
+      {
+         "path": "{{ packageRefPrefix}}eclipse-che-theia-plugin-remote"
+      },
+      {
+         "path": "{{ packageRefPrefix}}eclipse-che-theia-preferences-provider-extension"
+      },
+      {
+         "path": "{{ packageRefPrefix}}eclipse-che-theia-terminal"
+      },
+      {
+         "path": "{{ packageRefPrefix}}eclipse-che-theia-logging"
+      },
+      {
+         "path": "{{ packageRefPrefix}}eclipse-che-theia-remote-api"
+      },
+      {
+         "path": "{{ packageRefPrefix}}eclipse-che-theia-messaging"
+      },
+      {
+         "path": "{{ packageRefPrefix}}eclipse-che-theia-mini-browser"
+      },
+      {
+         "path": "{{ packageRefPrefix}}eclipse-che-theia-credentials"
+      }
+   ]
+}

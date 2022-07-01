@@ -1,0 +1,1 @@
+{"version":3,"file":"ConcreteClass.d.ts","sourceRoot":"","sources":["../../src/node/ConcreteClass.ts"],"names":[],"mappings":"AAAA,OAAO,EAAC,yBAAyB,EAAC,MAAM,6BAA6B,CAAC;AACtE,qBAAa,aAAc,SAAQ,yBAAyB;IAC3D,UAAU,EAAG,MAAM,CAAC;gBAER,EAAE,EAAG,MAAM,EAAE,EAAE,EAAG,MAAM;IAK7B,WAAW,CAAC,OAAO,EAAG,MAAM,GAAG,MAAM;CAoC5C"}

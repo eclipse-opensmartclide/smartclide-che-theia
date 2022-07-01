@@ -1,0 +1,192 @@
+#widget-container{
+  max-width: 100%;
+}
+#widget-container h2 {
+  color: var(--theia-ui-font-color1);
+  font-size: 12px;
+  font-weight: 400;
+  padding: 10px;
+  text-transform: uppercase;
+}
+
+#issues input{
+	background: transparent;
+  border: none;
+  color: white;
+  max-width: 100%;
+  height: 20px;
+}
+
+#TD{
+	display: none;
+	margin-left: 10px;
+	margin-top: 20px;
+}
+#show_pattern_table td {
+	width: 200px;
+}
+#issues{
+	margin-left: 10px;
+  margin-right: 10px;
+  max-width: 100%;
+}
+
+.divIssue{
+	border-style: solid;
+  border-width: thin;
+  margin: 5px;
+	padding: 2px;
+	border-color: #6a6a6a;
+}
+
+.divIssue i{
+  font-size: 12px;
+}
+
+.divIssue span{
+	float: right;
+}
+
+.divIssue p{
+	display: block;
+  font-size: 13px;
+	margin: auto;
+	margin-top: 3px;
+}
+.btn-get-classes{
+	display: hidden;
+}
+
+.suggestions {
+  border: 1px #ccc;
+  width:172px;
+  position: relative;
+  background-color: #3c3c3c;
+}
+
+#image{
+  max-width: 100%;
+  height: auto;
+}
+#elements{
+  max-width: 100%;
+}
+#result{
+  visibility: hidden;
+}
+.AbstractFactory{
+  content : url(./img/CreationalPatternsIcons/AbstractFactoryIcon.jpg);
+}
+.Adapter{
+  content : url(./img/StructuralPatternsIcons/AdapterIcon.jpg);
+}
+.Bridge{
+  content : url(./img/StructuralPatternsIcons/BridgeIcon.jpg);
+}
+.Builder{
+  content : url(./img/CreationalPatternsIcons/BuilderIcon.jpg);
+}
+.Composite{
+  content : url(./img/StructuralPatternsIcons/CompositeIcon.jpg);
+}
+.Decorator{
+  content : url(./img/StructuralPatternsIcons/DecoratorIcon.jpg);
+}
+.FactoryMethod{
+  content : url(./img/CreationalPatternsIcons/FactoryMethodIcon.jpg);
+}
+.Prototype{
+  content : url(./img/CreationalPatternsIcons/PrototypeIcon.jpg);
+}
+.Singleton{
+  content : url(./img/CreationalPatternsIcons/SingletonIcon.jpg);
+}
+.Visitor{
+    content : url(./img/BehavioralPatternsIcons/VisitorIcon.jpg);
+}
+.State{
+  content : url(./img/BehavioralPatternsIcons/StateIcon.jpg);
+}
+.Strategy{
+  content : url(./img/BehavioralPatternsIcons/StrategyIcon.jpg);
+}
+.TemplateMethod{
+  content : url(./img/BehavioralPatternsIcons/TemplateMethodIcon.jpg);
+}
+.Proxy{
+  content : url(./img/StructuralPatternsIcons/ProxyIcon.jpg);
+}
+
+
+#btn-wizzard{
+  margin-left: 50px;
+  
+}
+.infoField{
+  margin-right: 20px;
+	background: transparent;
+  border: none;
+  color: white;
+  height: 20px;
+  display:flex;
+  flex-direction: column;
+}
+#divWiz input{
+  margin-right: 20px;
+}
+
+#btn-refresh{
+	visibility: hidden;
+}
+
+.autocomplete {
+  background: white;
+  z-index: 1000;
+  font: 14px/22px "-apple-system", BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  overflow: scroll;
+  box-sizing: border-box;
+  border: 1px solid rgba(50, 50, 50, 0.6);
+  font-size: 13px;
+  position: absolute; 
+  height: auto; 
+  width: auto;
+}
+
+.autocomplete * {
+  font: inherit;
+}
+
+.autocomplete > div {
+  padding: 0 ;
+}
+
+.autocomplete .group {
+  background: #eee;
+}
+
+.autocomplete > div:hover:not(.group),
+.autocomplete > div.selected {
+  background: #eee;
+  cursor: pointer;
+}
+body::-webkit-scrollbar {
+  width: thin;               /* width of the entire scrollbar */
+}
+#btn-finalize{
+  margin-left:0px;
+}
+#btn-get-code{
+  margin-left:0px;
+}
+#projectName{
+  margin-left: 20px;
+  margin-right:20px;
+}
+#btn-back{
+  visibility: hidden;
+  margin-left: 15px;
+}
+
+#btn-wizard{
+  margin-left: 15px;
+}

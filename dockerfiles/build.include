@@ -1,0 +1,314 @@
+#!/bin/bash
+# Copyright (c) 2019 Red Hat, Inc.
+# This program and the accompanying materials are made
+# available under the terms of the Eclipse Public License 2.0
+# which is available at https://www.eclipse.org/legal/epl-2.0/
+#
+# SPDX-License-Identifier: EPL-2.0
+#
+
+set -e
+set -u
+
+IMAGE_ALIASES=${IMAGE_ALIASES:-}
+ERROR=${ERROR:-}
+DIR=${DIR:-}
+
+skip_tests() {
+  if [ $SKIP_TESTS = "true" ]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+dry_run() {
+  if [ "${DRY_RUN}" = "true" ]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+prepare_build_args() {
+    IFS=',' read -r -a BUILD_ARGS_ARRAY <<< "$@"
+    for i in ${BUILD_ARGS_ARRAY[@]+"${BUILD_ARGS_ARRAY[@]}"}; do
+    BUILD_ARGS+="--build-arg $i "
+    done
+}
+
+init() {
+  BLUE='\033[1;34m'
+  GREEN='\033[0;32m'
+  RED='\033[0;31m'
+  BROWN='\033[0;33m'
+  PURPLE='\033[0;35m'
+  NC='\033[0m'
+  BOLD='\033[1m'
+  UNDERLINE='\033[4m'
+
+  ORGANIZATION="eclipse"
+  PREFIX="che"
+  TAG="next"
+  DRY_RUN=false
+  DOCKER_BUILD_TARGET=""
+  UNPACK_CHE_THEIA_PLUGINS="true"
+  SKIP_TESTS=false
+  NAME="che"
+  ARGS=""
+  OPTIONS=""
+  DOCKERFILE=""
+  BUILD_ARGS=""
+
+  PARENT_IMAGE=""
+  BRANCH=""
+  GIT_REF=""
+  BUILD_IMAGE_TARGET="alpine"
+
+  while [ $# -gt 0 ]; do
+    case $1 in
+      --*)
+        OPTIONS="${OPTIONS} ${1}"
+        ;;
+      *)
+        ARGS="${ARGS} ${1}"
+        ;;
+    esac
+
+    case $1 in
+      --dry-run)
+        DRY_RUN=true
+        shift ;;
+      --tag:*)
+        TAG="${1#*:}"
+        shift ;;
+      --target:*)
+        DOCKER_BUILD_TARGET="--target ${1#*:}"
+        shift ;;
+      --organization:*)
+        ORGANIZATION="${1#*:}"
+        shift ;;
+      --prefix:*)
+        PREFIX="${1#*:}"
+        shift ;;
+      --name:*)
+        NAME="${1#*:}"
+        shift ;;
+      --skip-tests)
+        SKIP_TESTS=true
+        shift ;;
+      --compressed-plugins)
+        prepare_build_args UNPACK_CHE_THEIA_PLUGINS="false"
+        shift ;;
+      --dockerfile:*)
+        DOCKERFILE="${1#*:}"
+        shift ;;
+      --build-arg*:*)
+        BUILD_ARGS_CSV="${1#*:}"
+        prepare_build_args $BUILD_ARGS_CSV
+        shift ;;
+      --branch:*)
+        BRANCH="${1#*:}"
+        shift ;;
+      --git-ref:*)
+        GIT_REF="${1#*:}"
+        shift ;;
+      --*)
+        printf "${RED}Unknown parameter: $1${NC}\n"; exit 2 ;;
+      *)
+       shift;;
+    esac
+  done
+
+  IMAGE_NAME="$ORGANIZATION/$PREFIX-$NAME:$TAG"
+}
+
+build() {
+
+  # Compute directory
+  if [ -z $DIR ]; then
+      DIR=$(cd "$(dirname "$0")"; pwd)
+  fi
+
+  # If Dockerfile is empty, build all Dockerfiles
+  if [ -z ${DOCKERFILE} ]; then
+    DOCKERFILE_TARGET_TO_BUILD=$(ls -d1 ${DIR}/docker/* 2>/dev/null || echo '')
+    if [ -z "$DOCKERFILE_TARGET_TO_BUILD" ]; then
+      DOCKERFILE_TARGET_TO_BUILD="alpine"
+    fi
+    ORIGINAL_TAG=${TAG}
+    # Build image for each Dockerfile
+    for docker_target in ${DOCKERFILE_TARGET_TO_BUILD}; do
+       target=$(basename $docker_target)
+       # extract TAG from Dockerfile
+       if [ "${target}" != "alpine" ]; then
+         TAG="${ORIGINAL_TAG}-${target}"
+       else
+         TAG=${ORIGINAL_TAG}
+       fi
+       BUILD_IMAGE_TARGET=$target
+       IMAGE_NAME="$ORGANIZATION/$PREFIX-$NAME:$TAG"
+       DOCKERFILE="Dockerfile"
+       printf "${BOLD}Use of target: ${BUILD_IMAGE_TARGET}${NC}\n"
+       build_image
+    done
+
+    # restore variables
+    TAG=${ORIGINAL_TAG}
+    IMAGE_NAME="$ORGANIZATION/$PREFIX-$NAME:$TAG"
+  else
+    BUILD_IMAGE_TARGET=$(echo ${DOCKERFILE} | sed -e "s/^Dockerfile//" | sed -e "s/^\.//" | sed -e "s/^$/alpine/")
+    DOCKERFILE="Dockerfile"
+    # else if specified, build only the one specified
+    build_image
+  fi
+
+}
+
+update_macros() {
+  echo "$@" | sed s@\$\{BUILD_ORGANIZATION\}@${ORGANIZATION}@ | sed s/\$\{BUILD_PREFIX\}/${PREFIX}/ \
+  | sed s/\$\{BUILD_TAG\}/${TAG}/ | sed s/\$\{BUILD_PARENT_IMAGE\}/${PARENT_IMAGE}/ \
+  | sed s/\$\{BUILD_IMAGE_TARGET\}/${BUILD_IMAGE_TARGET}/  \
+  | sed s/\$\{GIT_BRANCH_NAME\}/${BRANCH}/ | sed s/\$\{GIT_REF\}/"${GIT_REF}"/
+}
+
+build_image() {
+  printf "${BOLD}Building Docker Image ${IMAGE_NAME} (target ${BUILD_IMAGE_TARGET}) from $DIR directory with tag $TAG${NC}\n"
+  # Replace macros in Dockerfiles
+  content_docker=$(cat ${DIR}/${DOCKERFILE})
+  update_macros "${content_docker}" > ${DIR}/.Dockerfile
+
+  # apply IF
+  if_patterns=$(sed -n 's/.*\#{IF:\(.*\)\}/\1/p' ${DIR}/.Dockerfile)
+   echo "$if_patterns" | while IFS= read -r conditional_arg ; do
+    if [ ! -z "$conditional_arg" ]; then
+      # trim argument
+      conditional_arg=$(echo $conditional_arg | xargs)
+
+      for i in ${BUILD_ARGS_ARRAY[@]+"${BUILD_ARGS_ARRAY[@]}"}; do
+        IFS='=' read -r PROPERTY_NAME PROPERTY_VALUE <<< "$i"
+        # If the conditional property is there, check
+        if [[ "$PROPERTY_NAME" == "$conditional_arg" ]]; then
+          # Is it false ?
+          if [[ "$PROPERTY_VALUE" = "false" ]]; then
+            # ok,need to filter out the lines
+            local if_line=$(grep -n "\#{IF:${PROPERTY_NAME}}" ${DIR}/.Dockerfile | cut -d ":" -f 1 | head -n 1) 
+            local endif_line=$(grep -n "\#ENDIF" ${DIR}/.Dockerfile | cut -d ":" -f 1 | head -n 1) 
+            sed -e "${if_line},${endif_line}d" ${DIR}/.Dockerfile > ${DIR}/.Dockerfile2
+            mv ${DIR}/.Dockerfile2 ${DIR}/.Dockerfile
+            echo "Filter lines with the IF ${PROPERTY_NAME}"
+          fi
+        fi
+      done
+    fi
+  done
+
+
+  # grab includes
+  to_include=$(sed -n 's/.*\#{INCLUDE:\(.*\)\}/\1/p' ${DIR}/.Dockerfile)
+
+  # perform includes (not use sed {r} to be portable)
+  echo "$to_include" | while IFS= read -r filename_to_include ; do
+    if [ ! -z "$filename_to_include" ]; then
+      # trim argument
+      filename_to_include=$(echo $filename_to_include | xargs)
+      local line_to_insert=$(grep -n "\#{INCLUDE:${filename_to_include}}" ${DIR}/.Dockerfile | cut -d ":" -f 1 | head -n 1) 
+      local head_line=$(($line_to_insert - 1))
+      local tail_line=$(($line_to_insert + 1))
+      local content_to_include=$(cat "${DIR}/$filename_to_include")
+      (head -n ${head_line} "${DIR}/.Dockerfile" && update_macros "$content_to_include" && tail -n +${tail_line} "${DIR}/.Dockerfile") > ${DIR}/.Dockerfile2
+      mv ${DIR}/.Dockerfile2 ${DIR}/.Dockerfile
+    fi
+  done
+
+  if ! dry_run; then
+    cd "${DIR}" && docker build --cache-from ${IMAGE_NAME} -f ${DIR}/.Dockerfile -t ${IMAGE_NAME} ${BUILD_ARGS} ${DOCKER_BUILD_TARGET} .
+    rm ${DIR}/.Dockerfile
+  fi
+  
+  if [ $? -eq 0 ]; then
+    printf "Build of ${BLUE}${IMAGE_NAME} ${GREEN}[OK]${NC}\n"
+    if [ ! -z "${IMAGE_ALIASES}" ]; then
+      for TMP_IMAGE_NAME in ${IMAGE_ALIASES}
+      do
+        docker tag ${IMAGE_NAME} ${TMP_IMAGE_NAME}:${TAG}
+        if [ $? -eq 0 ]; then
+          printf "  /alias ${BLUE}${TMP_IMAGE_NAME}:${TAG}${NC} ${GREEN}[OK]${NC}\n"
+        else
+          printf "${RED}Failure when building docker image ${IMAGE_NAME}${NC}\n"
+          exit 1
+        fi
+
+      done
+    fi
+    printf "${GREEN}Script run successfully: ${BLUE}${IMAGE_NAME}${NC}\n"
+  else
+    printf "${RED}Failure when building docker image ${IMAGE_NAME}${NC}\n"
+    exit 1
+  fi
+}
+
+check_docker() {
+  if ! docker ps > /dev/null 2>&1; then
+    output=$(docker ps)
+    printf "${RED}Docker not installed properly: ${output}${NC}\n"
+    exit 1
+  fi
+}
+
+docker_exec() {
+  "$(which docker)" "$@"
+}
+
+
+get_full_path() {
+  echo "$(cd "$(dirname "${1}")"; pwd)/$(basename "$1")"
+}
+
+convert_windows_to_posix() {
+  echo "/"$(echo "$1" | sed 's/\\/\//g' | sed 's/://')
+}
+
+get_clean_path() {
+  INPUT_PATH=$1
+  # \some\path => /some/path
+  OUTPUT_PATH=$(echo ${INPUT_PATH} | tr '\\' '/')
+  # /somepath/ => /somepath
+  OUTPUT_PATH=${OUTPUT_PATH%/}
+  # /some//path => /some/path
+  OUTPUT_PATH=$(echo ${OUTPUT_PATH} | tr -s '/')
+  # "/some/path" => /some/path
+  OUTPUT_PATH=${OUTPUT_PATH//\"}
+  echo ${OUTPUT_PATH}
+}
+
+get_mount_path() {
+  FULL_PATH=$(get_full_path "${1}")
+  POSIX_PATH=$(convert_windows_to_posix "${FULL_PATH}")
+  CLEAN_PATH=$(get_clean_path "${POSIX_PATH}")
+  echo $CLEAN_PATH
+}
+
+# Checks limit for queries to GitHub API
+# If limit has at least 10 queries then probably build will be succesfull
+# If limit has less than 10 queries but GITHUB_TOKEN environment variable is provided it should be ok
+# If limit has less than 10 queries and GITHUB_TOKEN environment variable is not provided, then the build will fail
+# Fails the script if build will probably fail
+check_github_limits() {
+  if [ -n "${GITHUB_TOKEN:-}" ]; then
+      export GITHUB_TOKEN=$GITHUB_TOKEN
+      echo "Setting GITHUB_TOKEN value from provided variable"
+    else
+      export GITHUB_LIMIT=$(curl -s 'https://api.github.com/rate_limit' | jq '.rate .remaining')
+      echo "Current API rate limit for https://api.github.com is ${GITHUB_LIMIT}"
+      if [ "${GITHUB_LIMIT}" -lt 10 ]; then
+        printf "\n\n\033[0;31m"
+        printf "Rate limit for https://api.github.com is reached."
+        printf "To be able to build this image, please provide GITHUB_TOKEN environment variable"
+        printf "\n\n\033[0m"
+        exit 1
+      else
+        echo "GITHUB_TOKEN variable is not set but https://api.github.com rate limit has enough slots"
+      fi
+    fi
+}

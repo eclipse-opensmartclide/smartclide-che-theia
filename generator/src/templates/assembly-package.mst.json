@@ -1,0 +1,89 @@
+{
+  "private": true,
+  "name": "@eclipse-che/theia-assembly",
+  "version": "0.0.1",
+  "theia": {
+    "frontend": {
+      "config": {
+        "applicationName": "Eclipse Che",
+        "defaultTheme": "dark",
+        "defaultIconTheme": "theia-file-icons",
+        "preferences": {
+          "editor.autoSave": "on",
+          "editor.semanticHighlighting.enabled": false,
+          "git.defaultCloneDirectory": "/projects",
+          "application.confirmExit": "always",
+          "files.enableTrash": false
+        }
+      }
+    }
+  },
+  "dependencies": {
+    "@theia/callhierarchy": "{{ theiaVersion }}",
+    "@theia/console": "{{ theiaVersion }}",
+    "@theia/core": "{{ theiaVersion }}",
+    "@theia/debug": "{{ theiaVersion }}",
+    "@theia/editor": "{{ theiaVersion }}",
+    "@theia/file-search": "{{ theiaVersion }}",
+    "@theia/filesystem": "{{ theiaVersion }}",
+    "@theia/keymaps": "{{ theiaVersion }}",
+    "@theia/markers": "{{ theiaVersion }}",
+    "@theia/messages": "{{ theiaVersion }}",
+    "@theia/metrics": "{{ theiaVersion }}",
+    "@theia/mini-browser": "{{ theiaVersion }}",
+    "@theia/monaco": "{{ theiaVersion }}",
+    "@theia/navigator": "{{ theiaVersion }}",
+    "@theia/outline-view": "{{ theiaVersion }}",
+    "@theia/output": "{{ theiaVersion }}",
+    "@theia/plugin-dev": "{{ theiaVersion }}",
+    "@theia/plugin-ext": "{{ theiaVersion }}",
+    "@theia/plugin-ext-vscode": "{{ theiaVersion }}",
+    "@theia/preferences": "{{ theiaVersion }}",
+    "@theia/preview": "{{ theiaVersion }}",
+    "@theia/process": "{{ theiaVersion }}",
+    "@theia/search-in-workspace": "{{ theiaVersion }}",
+    "@theia/task": "{{ theiaVersion }}",
+    "@theia/userstorage": "{{ theiaVersion }}",
+    "@theia/variable-resolver": "{{ theiaVersion }}",
+    "@theia/workspace": "{{ theiaVersion }}",
+    "babel-loader": "^8.2.2",
+    "buffer": "^6.0.3",
+    "source-map-loader": "^2.0.1",
+    "source-map-support": "^0.5.19",
+    "style-loader": "^2.0.0",
+    "umd-compat-loader": "^2.1.2",
+    "webpack": "^5.36.2",
+    "worker-loader": "^3.0.8",
+    "async-limiter": "^2.0.0"
+
+  },
+  "bin": {
+    "override-vs-loader": "./scripts/override-vs-loader.js"
+  },
+  "scripts": {
+    "clean": "theia clean && rimraf errorShots",
+    "compile": "tsc -b",
+    "bundle": "theia build --mode production --config cdn/webpack.config.js --env cdn=./cdn.json --env monacopkg={{ monacoVersion }} && yarn run override-vs-loader",
+    "build": "yarn compile && yarn bundle",
+    "override-vs-loader": "override-vs-loader",
+    "watch": "concurrently -n compile,bundle \"theiaext watch --preserveWatchOutput\" \"theia build --watch --mode development\"",
+    "start": "theia start",
+    "start:debug": "yarn start --log-level=debug",
+    "test": "wdio wdio.conf.js",
+    "test-non-headless": "wdio wdio-non-headless.conf.js",
+    "coverage:compile": "yarn build --config coverage-webpack.config.js",
+    "coverage:remap": "remap-istanbul -i coverage/coverage.json -o coverage/coverage-final.json --exclude 'frontend/index.js' && rimraf coverage/coverage.json",
+    "coverage:report:html": "istanbul report --root coverage --format html",
+    "coverage:report:lcov": "istanbul report --root coverage --format lcov",
+    "coverage": "yarn coverage:compile && yarn test && yarn coverage:remap && yarn coverage:report:lcov && yarn coverage:report:html"
+  },
+  "devDependencies": {
+    "@theia/cli": "{{ theiaVersion }}",
+    "html-webpack-plugin": "^5.3.1",
+    "@theia/compression-webpack-plugin": "^3.0.0",
+    "circular-dependency-plugin": "^5.2.2",
+    "copy-webpack-plugin": "^8.1.1",
+    "webpack-cli": "^4.7.0",
+    "process": "^0.11.10"
+  }
+}
