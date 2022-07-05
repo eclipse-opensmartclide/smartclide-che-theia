@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-GITHUB_TOKEN="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"
+GITHUB_TOKEN="TOKEN"
 
 docker image prune -a -f
 
