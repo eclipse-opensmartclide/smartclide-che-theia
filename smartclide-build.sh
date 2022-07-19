@@ -2,6 +2,8 @@
 
 GITHUB_TOKEN="TOKEN"
 
+docker builder prune -f
+
 docker image prune -a -f
 
 docker pull quay.io/eclipse/che-theia-dev:next
