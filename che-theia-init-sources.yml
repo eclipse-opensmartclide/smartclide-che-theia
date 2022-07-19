@@ -23,8 +23,8 @@ sources:
     - extensions/eclipse-che-theia-remote-impl-k8s
     - extensions/eclipse-che-theia-credentials
     - extensions/smartclide-service-creation-theia
+    - extensions/smartclide-td-reusability-theia
     - extensions/smartclide-design-pattern-selection-theia
-#    - extensions/smartclide-td-reusability-theia
   plugins:
     - plugins/containers-plugin
     - plugins/ext-plugin
