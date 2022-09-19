@@ -1,3 +1,0 @@
-# the file is used for tests only
-# the content doesn't matter for tests
-# having real dependencies here causes Depenndabot alerts about potential security vulnerabilities in our dependencies 

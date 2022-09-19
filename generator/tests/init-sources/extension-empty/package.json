@@ -1,9 +1,0 @@
-{
-  "name": "@some/plugin",
-  "version": "0.0.1",
-  "license": "EPL-2.0",
-  "types": "./src/foo.d.ts",
-  "files": [
-    "src"
-  ]
-}
