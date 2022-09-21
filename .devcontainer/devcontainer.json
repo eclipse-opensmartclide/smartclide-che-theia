@@ -36,7 +36,7 @@
 	],
 	//"workspaceMount": "source=cheSource,target=/workspace,type=volume",
 	//"workspaceFolder": "/workspace",
-	"postCreateCommand": "sudo chown node che-theia && { cd che-theia; git pull; } || git clone https://github.com/eclipse-che/che-theia.git",
+	"postCreateCommand": "sudo chown node che-theia && { cd che-theia; git pull; } || { cd .. && git clone https://github.com/eclipse-che/che-theia.git }",
 	//"postCreateCommand": "git clone https://github.com/eclipse-che/che-theia.git",
 	"features": {
 		"docker-from-docker": "20.10",
