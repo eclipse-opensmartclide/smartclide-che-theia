@@ -1,3 +1,5 @@
+_This repository was archived because it does not provide direct support to the Eclipse OpenSmartCLIDE project. Nevertheless, this Che-Theia image builder is still available [here](https://github.com/unparallel-innovation/smartclide-che-theia-builder)._
+
 # Overview
 
 This repository contains a script that builds a Che-Theia image with custom extensions, abstracting the configuration
